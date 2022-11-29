@@ -23,6 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 
 import 'hammerjs';
 import { DishService } from './services/dish.service';
+import { PromotionService } from './services/promotion.service';
 
 
 @NgModule({
@@ -47,7 +48,7 @@ import { DishService } from './services/dish.service';
     MatButtonModule,
     AppRoutingModule
   ],
-  providers: [DishService],
+  providers: [DishService, PromotionService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
