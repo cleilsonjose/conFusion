@@ -16,10 +16,10 @@ import { baseURL } from "../shared/baseurl";
 export class DishdetailComponent implements OnInit {
   dish: Dish;
   dishIds: string[];
+  dishcopy: Dish;
   prev: string;
   next: string;
   errMess: string;
-
   commentForm: FormGroup;
   comment: Comment;
   @ViewChild("fform") commentFormDirective;
@@ -41,7 +41,7 @@ export class DishdetailComponent implements OnInit {
   };
 
   constructor(
-    private dishservice: DishService,
+    private dishService: DishService,
     private route: ActivatedRoute,
     private location: Location,
     private fb: FormBuilder,
@@ -51,17 +51,18 @@ export class DishdetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.dishservice
+    this.dishService
       .getDishIds()
       .subscribe((dishIds) => (this.dishIds = dishIds),
       errmess => this.errMess = <any>errmess);
 
     this.route.params
       .pipe(
-        switchMap((params: Params) => this.dishservice.getDish(params["id"]))
+        switchMap((params: Params) => this.dishService.getDish(params["id"]))
       )
       .subscribe((dish) => {
         this.dish = dish;
+        this.dishcopy = dish;
         this.setPrevNext(dish.id);
       },
       errmess => this.errMess = <any>errmess);
@@ -115,17 +116,25 @@ export class DishdetailComponent implements OnInit {
 
   onSubmit() {
     this.comment = this.commentForm.value;
+    console.log(this.comment);
+
     var d = new Date();
     this.comment["date"] = d.toISOString();
 
-    this.dish.comments.push(this.comment);
+    this.dishcopy.comments.push(this.comment);
+    this.dishService.putDish(this.dishcopy)
+        .subscribe(dish => {
+            this.dish = dish;
+            this.dishcopy = dish;
+        });
 
     this.commentFormDirective.resetForm();
 
     this.commentForm.reset({
-      author: "",
-      comment: "",
-      rating: "5",
+        author: '',
+        comment: '',
+        rating: '5'
     });
-  }
+
+}
 }
