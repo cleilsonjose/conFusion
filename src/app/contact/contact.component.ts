@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { flyInOut } from '../animations/app.animation';
+import { expand, flyInOut, hide, visibility } from '../animations/app.animation';
 import { Feedback, ContactType } from '../shared/feedback';
+import { FeedbackService } from '../services/feedback.service';
 
 @Component({
   selector: 'app-contact',
@@ -12,7 +13,10 @@ import { Feedback, ContactType } from '../shared/feedback';
     'style': 'display: block;'
     },
     animations: [
-      flyInOut()
+      flyInOut(),
+      visibility(),
+      expand(),
+      hide()
     ]
 })
 export class ContactComponent implements OnInit {
@@ -20,6 +24,9 @@ export class ContactComponent implements OnInit {
   feedbackForm: FormGroup;
   feedback: Feedback;
   contactType = ContactType;
+  errMess: string;
+  visibilitySpinner = 'hidden';
+  visibilityForm = 'shown';
   @ViewChild('fform') feedbackFormDirective;
   formErrors = {
     'firstname': '',
@@ -28,9 +35,10 @@ export class ContactComponent implements OnInit {
     'email': ''
   };
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,
+    private feedbackService: FeedbackService) {
     this.createForm();
-   }
+  }
 
   ngOnInit() {
   }
@@ -93,8 +101,20 @@ export class ContactComponent implements OnInit {
   }
 
   onSubmit() {
-    this.feedback = this.feedbackForm.value;
-    console.log(this.feedback);
+    this.visibilityForm = 'hidden';
+    this.visibilitySpinner = 'shown';
+    console.log(this.feedbackForm.value);
+    this.feedbackService.submitFeedback(this.feedbackForm.value)
+      .subscribe(feedback => {
+        this.visibilitySpinner = 'hidden';
+        this.feedback = feedback;
+        setTimeout(func => {
+          this.feedback = null;
+          this.visibilityForm = 'shown';
+        }, 5000)
+      },
+        errmess => { this.feedback = null; this.errMess = <any>errmess });
+
     this.feedbackForm.reset({
       firstname: '',
       lastname: '',

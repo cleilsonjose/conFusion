@@ -54,3 +54,15 @@ export function expand() {
     ]),
   ]);
 }
+
+export function hide() {
+  return trigger('hide', [
+      state('shown', style({
+          visibility: 'visible'
+      })),
+      state('hidden', style({
+          display: 'none'
+      })),
+      transition('* => *', animate('0.1s ease-in-out'))
+  ]);
+}
